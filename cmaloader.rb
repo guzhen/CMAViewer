@@ -9,9 +9,8 @@ class CMAApp
 
 	def load(path)
 		begin
-			Dir.chdir path do
+			Dir.chdir File.join(path,PATH) do
 				@info[:path]=path
-				Dir.chdir PATH
 				@info[:user]=Dir.entries.select{|e| e!='.' && e!='..'}
 				return @info[:user]
 			end
@@ -33,4 +32,9 @@ class CMAApp
 			return nil
 		end
 	end
+end
+
+def test
+	t=CMAApp.new
+	p t.load 'testdata'
 end
