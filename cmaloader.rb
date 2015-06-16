@@ -1,5 +1,5 @@
 class CMAApp
-	FOLDERS=["app","appmeta","license","patch","savedata","sce_sys",]
+	#FOLDERS=["app","appmeta","license","patch","savedata","sce_sys",]
 	PATH='APP'
 
 	def initialize
@@ -8,7 +8,7 @@ class CMAApp
 	end
 
 	def load(path)
-		apppath = File.join(path,PATH)
+		apppath = File.join(File.realpath(path),PATH)
 		Dir.chdir apppath do
 			@info[:path]=apppath
 			@info[:user]=Dir.entries('.').select{|e| e!='.' && e!='..'}
@@ -36,10 +36,39 @@ class CMAApp
 	end
 
 	def getsize(path)
-		return [1000,200,3000].map{|e|e.to_s}
+		allsize = (getfdsize(path) / (1024*1024)).to_i
+		patch = 0
+		if Dir.exist?(File.join(path,'patch'))
+			patch = (getfdsize(File.join(path,'patch'))/ (1024*1024)).to_i
+		end
+		save = 0
+		if Dir.exist?(File.join(path,'savedata'))
+			save = (getfdsize(File.join(path,'savedata'))/1024).to_i
+		end
+		return [allsize,patch,save].map{|e|e.to_s}
 	end
 
 	def gettitle(path)
-		return 'some title'
+		conf=File.new(path, 'rb')
+		conf.seek(632)
+		data=[]
+		conf.each_byte{|b| if b!=0 then data<<b; else break; end}
+		return data.pack('C*').force_encoding('UTF-8')
 	end
+
+	def getfdsize(path)
+		sum=0
+		Dir.chdir path do
+			Dir.entries('.').select{|e| e!='.' && e!='..'}.each{|f|
+				fpath=File.join(path,f)
+				if File.directory?(f)
+					sum += getfdsize(fpath)
+				else
+					sum += File.size(fpath)
+				end
+			}
+		end
+		return sum
+	end
+
 end

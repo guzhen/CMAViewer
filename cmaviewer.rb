@@ -111,9 +111,9 @@ class UIApp<Qt::Widget
 				icon_label.resize 128,128
 				icon_label.move basex, basey
 				label_id = Qt::Label.new item[:title],screen
-				label_id.resize 100,20
+				label_id.resize 200,20
 				label_id.move basex+130+10,basey
-				label_size = Qt::Label.new 'Size:',screen
+				label_size = Qt::Label.new 'Total:',screen
 				label_size.resize 50,20
 				label_size.move basex+130+10,basey+30
 				label_size_mb = Qt::Label.new item[:size]+'MB',screen
