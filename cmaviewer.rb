@@ -63,20 +63,27 @@ class UIApp<Qt::Widget
 	slots 'onLoad()','onUser()','onClick(QString)'
 	def onLoad
 		#testgen @ui['lineEdit_path'].text.to_i
-		users = @control.load(@ui['lineEdit_path'].text)
+		users = @control.load(@ui['lineEdit_path'].text.lstrip.rstrip)
+		if users.class != Array
+			openmsg "path error!\nCan not get user ID!"
+			return
+		end
 		users.each{|user| @ui['comboBox_user'].addItem(user)}
 		if users.length == 1
 			onUser
-		elsif users.length > 1
-			@ui['comboBox_user'].setDisabled false
 		else
-			openmsg "path error!\nCan not get user ID!"
+			@ui['comboBox_user'].setDisabled false
 		end
 	end
 	def onUser
 		datas = @control.select @ui['comboBox_user'].currentText
+		if datas.class != Array
+			openmsg "data error!"
+			return
+		end
 		if datas.length <= 0
 			openmsg "Nothing in the path!"
+			return
 		end
 		genlist datas
 	end
@@ -103,13 +110,13 @@ class UIApp<Qt::Widget
 				icon_label.setPixmap icon
 				icon_label.resize 128,128
 				icon_label.move basex, basey
-				label_id = Qt::Label.new item[:id],screen
+				label_id = Qt::Label.new item[:title],screen
 				label_id.resize 100,20
 				label_id.move basex+130+10,basey
 				label_size = Qt::Label.new 'Size:',screen
 				label_size.resize 50,20
 				label_size.move basex+130+10,basey+30
-				label_size_mb = Qt::Label.new item[:size]+' MB',screen
+				label_size_mb = Qt::Label.new item[:size]+'MB',screen
 				label_size_mb.resize 50,20
 				label_size_mb.move basex+130+10+50,basey+30
 				button_delete = Qt::PushButton.new 'delete game',screen
