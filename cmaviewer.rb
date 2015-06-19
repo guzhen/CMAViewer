@@ -88,7 +88,12 @@ class UIApp<Qt::Widget
 		genlist datas
 	end
 	def onClick(i)
-		p 'button '+i+' clicked'
+		index,action=i.split "\n"
+		ret=@control.delete(index.to_i,action)
+		if ret==false
+			openmsg "error on delete"
+		end
+		onUser
 	end
 
 	################################

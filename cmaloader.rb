@@ -1,10 +1,12 @@
 class CMAApp
 	#FOLDERS=["app","appmeta","license","patch","savedata","sce_sys",]
 	PATH='APP'
+	ACTION=['game','patch','save']
 
 	def initialize
 		@info={'path'=>'','user'=>[]}
 		@data={}
+		@user=''
 	end
 
 	def load(path)
@@ -21,8 +23,10 @@ class CMAApp
 			return nil
 		end
 		if @data.has_key?(user)==true
+			@user=user
 			return @data[user]
 		end
+		@user=user
 		userpath = File.join(@info[:path],user)
 		Dir.chdir userpath
 		games=Dir.entries('.').select{|e| e!='.' && e!='..'}
@@ -32,7 +36,19 @@ class CMAApp
 				:title=>gettitle(File.join(userpath,item,'sce_sys','param.sfo')),
 				:id=>item,:size=>size[0],:patch=>size[1],:save=>size[2]}
 		}
-		return games
+		@data[@user]=games
+		return @data[@user]
+	end
+
+	def delete(index,action)
+		if @data.has_key?(@user)==false || @data[@user].length<=index || ACTION.include?(action)==false
+			return false;
+		end
+		unit=@data[@user][index]
+		basepath=File.join(@info[:path],@user,unit[:id])
+		path=Hash[ACTION.zip [basepath,File.join(basepath,'patch'),File.join(basepath,'savedata')]]
+		p path[action]
+		return true
 	end
 
 	def getsize(path)
