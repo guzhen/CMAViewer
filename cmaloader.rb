@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class CMAApp
 	#FOLDERS=["app","appmeta","license","patch","savedata","sce_sys",]
 	PATH='APP'
@@ -29,7 +31,10 @@ class CMAApp
 		@user=user
 		userpath = File.join(@info[:path],user)
 		Dir.chdir userpath
-		games=Dir.entries('.').select{|e| e!='.' && e!='..'}
+		if Dir.entries('.').length == 2
+			return []
+		end
+		games=Dir.entries('.').select{|e| e!='.' && e!='..'}.sort_by{ |x| File.mtime(x)}.reverse
 		games.map!{|item|
 			size=getsize(File.join(userpath,item))
 			{:icon=>File.join(userpath,item,'sce_sys','icon0.png'),
@@ -40,15 +45,20 @@ class CMAApp
 		return @data[@user]
 	end
 
-	def delete(index,action)
+	def delete_path(index,action)
 		if @data.has_key?(@user)==false || @data[@user].length<=index || ACTION.include?(action)==false
-			return false;
+			return nil
 		end
 		unit=@data[@user][index]
 		basepath=File.join(@info[:path],@user,unit[:id])
 		path=Hash[ACTION.zip [basepath,File.join(basepath,'patch'),File.join(basepath,'savedata')]]
-		p path[action]
-		return true
+		return path[action]
+	end
+
+	def delete_action(path)
+		FileUtils.rm_rf path
+		@data.delete @user
+		sleep 0.25 #avoid conflict on reload
 	end
 
 	def getsize(path)
@@ -69,6 +79,7 @@ class CMAApp
 		conf.seek(632)
 		data=[]
 		conf.each_byte{|b| if b!=0 then data<<b; else break; end}
+		conf.close
 		return data.pack('C*').force_encoding('UTF-8')
 	end
 

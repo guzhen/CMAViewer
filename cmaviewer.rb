@@ -81,17 +81,18 @@ class UIApp<Qt::Widget
 			openmsg "data error!"
 			return
 		end
-		if datas.length <= 0
-			openmsg "Nothing in the path!"
-			return
-		end
 		genlist datas
 	end
 	def onClick(i)
 		index,action=i.split "\n"
-		ret=@control.delete(index.to_i,action)
-		if ret==false
-			openmsg "error on delete"
+		path=@control.delete_path(index.to_i,action)
+		if path==nil
+			openmsg "error on delete!"
+		else
+			ret=openmsg "Sure to delete?",2
+			if ret == Qt::MessageBox::Yes
+				@control.delete_action path
+			end
 		end
 		onUser
 	end
@@ -99,7 +100,11 @@ class UIApp<Qt::Widget
 	################################
 	#	functions
 	def openmsg(msg,level=1)
-		Qt::MessageBox.information(nil, 'Message',msg)
+		if level==1
+			return Qt::MessageBox.information(nil, 'Message',msg)
+		elsif level==2
+			return Qt::MessageBox.warning(nil,'Confirm',msg,Qt::MessageBox::Yes|Qt::MessageBox::No,Qt::MessageBox::No)
+		end
 	end
 
 	def genlist(items)
@@ -115,6 +120,7 @@ class UIApp<Qt::Widget
 				icon_label.setPixmap icon
 				icon_label.resize 128,128
 				icon_label.move basex, basey
+				icon_label.setToolTip item[:id]+"\n"+item[:title]
 				label_id = Qt::Label.new item[:title],screen
 				label_id.resize 200,20
 				label_id.move basex+130+10,basey
