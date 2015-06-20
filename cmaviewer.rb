@@ -22,6 +22,7 @@ class UIApp<Qt::Widget
 		lineEdit_path = Qt::LineEdit.new self
 		lineEdit_path.resize 200,20
 		lineEdit_path.move 70,10
+		lineEdit_path.setFocus
 		@ui['lineEdit_path']=lineEdit_path
 		label_user = Qt::Label.new "User ID:",self
 		label_user.resize 50,20
